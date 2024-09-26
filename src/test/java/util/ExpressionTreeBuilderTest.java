@@ -1,7 +1,7 @@
 package util;
 
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import model.TreeNode;
 
@@ -28,7 +28,7 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("- 5 - 1 ", "-5-1"),
             new ExpressionTestCase("1 - 5", "1-5"),
             new ExpressionTestCase("1 - (-1*b)-3", "1--1*b-3"),
-            new ExpressionTestCase("1 * (-1 - -b)-3-2-1 ", "1*(-1--b)-3-2-1abc")
+            new ExpressionTestCase("1 * (-1 - -b)-3-2-1 ", "1*(-1--b)-3-2-1")
         );
     }
 
