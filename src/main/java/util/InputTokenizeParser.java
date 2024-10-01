@@ -71,7 +71,7 @@ public class InputTokenizeParser {
 
     public static void main(final String[] args) {
 
-        final List<String> parsed1 = parse("1*(2+(3*(4+5)))");
+        final List<String> parsed1 = parse("1+(-(1)*2)");
         parsed1.forEach(System.out::println);
 
     }

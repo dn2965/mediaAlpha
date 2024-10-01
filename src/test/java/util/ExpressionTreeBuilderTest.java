@@ -18,6 +18,26 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("2 + (3 / -5)", "2+3/-5"),
             new ExpressionTestCase("x+(y+z)+(t+(v+w))", "x+y+z+t+v+w"),
 
+            new ExpressionTestCase("()", ""),
+            new ExpressionTestCase("(())", ""),
+            new ExpressionTestCase("(((1)))", "1"),
+            new ExpressionTestCase("(((1+2)))", "1+2"),
+            new ExpressionTestCase("(((1*2)))", "1*2"),
+            new ExpressionTestCase("(((1--2)))", "1--2"),
+            new ExpressionTestCase("((-(1)))", "-1"),
+            new ExpressionTestCase("((-(1)*2))", "-1*2"),
+            new ExpressionTestCase("1+(-(1)*2)", "1+-1*2"),
+            new ExpressionTestCase("(1)+(-1*2)", "1+-1*2"),
+            new ExpressionTestCase("(1)+((-1)*2)", "1+-1*2"),
+            new ExpressionTestCase("-(1)+((-1)*2)", "-1+-1*2"),
+            new ExpressionTestCase("-(1)+((-1)*(2))", "-1+-1*2"),
+            new ExpressionTestCase("(-1)+(-1)*(2)", "-1+-1*2"),
+            new ExpressionTestCase("(-1)+((-1)+(2))", "-1+-1+2"),
+            new ExpressionTestCase("(-1)+((-1)-(2))", "-1+(-1-2)"),
+            new ExpressionTestCase("-1--2", "-1--2"),
+            new ExpressionTestCase("1--2", "1--2"),
+
+            new ExpressionTestCase("(1+1+2) ", "1+1+2"),
             new ExpressionTestCase("1*(2+3*(4+5))", "1*(2+3*(4+5))"),
             new ExpressionTestCase("2+3/-5", "2+3/-5"),
             new ExpressionTestCase("x+y+z+t+v+w", "x+y+z+t+v+w"),
@@ -28,7 +48,9 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("- 5 - 1 ", "-5-1"),
             new ExpressionTestCase("1 - 5", "1-5"),
             new ExpressionTestCase("1 - (-1*b)-3", "1--1*b-3"),
-            new ExpressionTestCase("1 * (-1 - -b)-3-2-1 ", "1*(-1--b)-3-2-1")
+            new ExpressionTestCase("1 * (-1 - -b)-3-2-1 ", "1*(-1--b)-3-2-1"),
+            new ExpressionTestCase("2-(2+3)", "2-(2+3)"),
+            new ExpressionTestCase("-(2)-(2+3)", "-2-(2+3)")
         );
     }
 
@@ -36,7 +58,7 @@ public class ExpressionTreeBuilderTest {
     @MethodSource("expressionProvider")
     void buildExpressionTreeTest(final ExpressionTestCase testCase) {
         final TreeNode expressionTree = new ExpressionTreeBuilder().buildExpressionTree(testCase.expression);
-        final String result = TraversalExpressionHelper.inorderTraversalExpression(expressionTree);
+        final String result = TraversalExpressionHelper.traversalExpression(expressionTree);
         assertEquals(testCase.expectedResult, result);
     }
 
