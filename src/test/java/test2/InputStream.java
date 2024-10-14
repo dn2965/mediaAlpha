@@ -1,4 +1,0 @@
-package test2;
-
-public class InputStream {
-}
