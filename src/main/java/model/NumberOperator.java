@@ -1,6 +1,5 @@
 package model;
 
-import java.util.List;
 import lombok.Getter;
 
 public enum NumberOperator {
@@ -10,10 +9,6 @@ public enum NumberOperator {
     @Getter
     private int priority;
 
-    public static NumberOperator findBySign(final char charInput) {
-        return findBySign(String.valueOf(charInput));
-    }
-
     public static NumberOperator findBySign(final String signString) {
         final NumberOperator[] values = NumberOperator.values();
         for (final NumberOperator numberOperator : values) {
@@ -22,13 +17,6 @@ public enum NumberOperator {
             }
         }
         return null;
-    }
-
-    public static boolean isLastElementNumberOperator(final List<String> signList) {
-        if(signList == null && signList.isEmpty()){
-            return false;
-        }
-        return findBySign(signList.get(signList.size() - 1)) != null;
     }
 
     NumberOperator(String signString, int priorityNumber) {
