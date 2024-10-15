@@ -110,7 +110,8 @@ public class InputTokenizeParser {
     }
 
     public static void main(final String[] args) {
-        final List<String> parsed1 = parse(" (  - 1 ) + (    ( -1 )   -( 2 ) )");
+//        final List<String> parsed1 = parse("(2*3)/5");
+        final List<String> parsed1 = parse("2*(3/5)");
         parsed1.forEach(e -> System.out.println("[" + e + "]"));
         final StringBuilder concat = new StringBuilder();
         parsed1.forEach(concat::append);

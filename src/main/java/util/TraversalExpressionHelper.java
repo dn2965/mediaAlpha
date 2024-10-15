@@ -1,8 +1,6 @@
 package util;
 
-
-import static util.ExpressionTreeBuilder.LEFT_PARENTHESIS;
-import static util.ExpressionTreeBuilder.RIGHT_PARENTHESIS;
+import static model.NumberOperator.SUBTRACTION;
 
 import lombok.extern.slf4j.Slf4j;
 import model.NumberOperator;
@@ -25,26 +23,20 @@ public class TraversalExpressionHelper {
 
         final StringBuilder result = new StringBuilder();
         if (currentNode.getOperandLeft() == null && currentNode.getOperandRight() == null) {
-            if (currentNode.isWrappedByParenthesis()) {
-                if (isLeft && currentNode.getTrimmedValue().startsWith("-")) {
-                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
-                } else if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION || NumberOperator.findBySign(operatorOutsideString) == NumberOperator.SUBTRACTION) && currentNode.getTrimmedValue().startsWith("-")) {
-                    result.append(currentNode.getLeftParenthesis()).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis());
-                } else if (NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION && !currentNode.getTrimmedValue().startsWith("-")) {
-                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
-                } else if (NumberOperator.findBySign(operatorOutsideString) == NumberOperator.MULTIPLICATION && currentNode.getTrimmedValue().startsWith("-")) {
-                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
-                } else if (NumberOperator.findBySign(operatorOutsideString) == NumberOperator.DIVISION) {
-                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
-                } else if (isLeft || operatorOutsideString.isEmpty()) {
-                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
-                } else {
-                    result.append(currentNode.getLeftParenthesis()).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis());
-                }
-                return result.toString();
-            } else {
+            if (!currentNode.isWrappedByParenthesis()) {
                 return currentNode.getExpressionData();
             }
+            final boolean isNegative = currentNode.getTrimmedValue().startsWith(SUBTRACTION.getSign());
+            final boolean isAddition = NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION;
+            final boolean isMultiplication = NumberOperator.findBySign(operatorOutsideString) == NumberOperator.MULTIPLICATION;
+            final boolean isDivision = NumberOperator.findBySign(operatorOutsideString) == NumberOperator.DIVISION;
+
+            if ((isAddition && !isNegative) || (isMultiplication && isNegative) || (isDivision) || (isLeft || operatorOutsideString.isEmpty())) {
+                result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
+            } else {
+                result.append(currentNode.getLeftParenthesis()).append(currentNode.getExpressionData()).append(currentNode.getRightParenthesis());
+            }
+            return result.toString();
         }
 
         final String left = traversalExpression(currentNode.getOperandLeft(), true, currentNode.getTrimmedValue());
@@ -60,16 +52,16 @@ public class TraversalExpressionHelper {
             }
             result.append(currentNode.getExpressionData());
 
-            if ((nodeOperator == NumberOperator.ADDITION) && currentNode.getOperandRight().getTrimmedValue().startsWith("-") && (currentNode.getOperandRight().getOperandRight() == null && currentNode.getOperandRight().getOperandLeft() == null)) {
+            if ((nodeOperator == NumberOperator.ADDITION) && currentNode.getOperandRight().getTrimmedValue().startsWith(SUBTRACTION.getSign()) && (currentNode.getOperandRight().getOperandRight() == null && currentNode.getOperandRight().getOperandLeft() == null)) {
 
                 result.append(currentNode.getLeftParenthesis()).append(right).append(currentNode.getRightParenthesis());
 
             } else if ((nodeOperator == NumberOperator.SUBTRACTION)
-                && currentNode.getOperandRight().getTrimmedValue().startsWith("-")
+                && currentNode.getOperandRight().getTrimmedValue().startsWith(SUBTRACTION.getSign())
                 && (currentNode.getOperandRight().getOperandRight() == null && currentNode.getOperandRight().getOperandLeft() == null && currentNode.getOperandRight().isWrappedByParenthesis())
             ) {
                 result.append(right);
-            } else if ((nodeOperator == NumberOperator.SUBTRACTION) && currentNode.getOperandRight().getTrimmedValue().startsWith("-") && (currentNode.getOperandRight().getOperandRight() == null && currentNode.getOperandRight().getOperandLeft() == null)) {
+            } else if ((nodeOperator == NumberOperator.SUBTRACTION) && currentNode.getOperandRight().getTrimmedValue().startsWith(SUBTRACTION.getSign()) && (currentNode.getOperandRight().getOperandRight() == null && currentNode.getOperandRight().getOperandLeft() == null)) {
                 result.append(currentNode.getOperandRight().getLeftParenthesis()).append(right).append(currentNode.getOperandRight().getRightParenthesis());
             } else if (currentNode.getOperandRight().getOperandRight() != null
                 && nodeOperator == NumberOperator.findBySign(currentNode.getOperandRight().getTrimmedValue())
@@ -83,24 +75,16 @@ public class TraversalExpressionHelper {
             return result.toString();
         }
 
-        // 處理  兩個都是只有單一數字節點 例如  3 - 1 / -8  這時  1/-8 不需要括號
-        if (currentNode.getOperandLeft() != null
-            && currentNode.getOperandLeft().getOperandLeft() == null
-            && currentNode.getOperandLeft().getOperandRight() == null
-            && currentNode.getOperandRight() != null
-            && currentNode.getOperandRight().getOperandLeft() == null
-            && currentNode.getOperandRight().getOperandRight() == null) {
-            // 依規定，若是有這樣的例子  1+-1*2 需要輸出  1+(-1*2)，也就是不讓+-  直接面對面
+        if (isComposedNode(currentNode)) {
 
-            // 左節點為負數
-            if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.SUBTRACTION || NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION) && left.startsWith("-")) {
+            // for case
+            // 1 - (2 - 3)
+            if (NumberOperator.findBySign(operatorOutsideString) == nodeOperator && (nodeOperator == NumberOperator.SUBTRACTION || nodeOperator == NumberOperator.DIVISION)) {
                 result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
                 return result.toString();
             }
 
-
-            // 若內外都是相同的運算元
-            if (NumberOperator.findBySign(operatorOutsideString) == nodeOperator && nodeOperator == NumberOperator.DIVISION) {
+            if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.SUBTRACTION || NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION) && left.startsWith(SUBTRACTION.getSign())) {
                 result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
                 return result.toString();
             }
@@ -109,20 +93,24 @@ public class TraversalExpressionHelper {
                 result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
                 return result.toString();
             }
+
+            if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.MULTIPLICATION && nodeOperator == NumberOperator.DIVISION) || nodeOperator == NumberOperator.MULTIPLICATION && NumberOperator.findBySign(operatorOutsideString) == NumberOperator.DIVISION) {
+                result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
+                return result.toString();
+            }
+
             if (priorityOfOutsideOperator == priorityOfCurrentNodeOperator && NumberOperator.findBySign(operatorOutsideString) != nodeOperator && currentNode.isWrappedByParenthesis()) {
                 result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
                 return result.toString();
             }
 
-            if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.SUBTRACTION || NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION)
-                && (nodeOperator == NumberOperator.DIVISION || nodeOperator == NumberOperator.MULTIPLICATION)
-            ) {
+            if ((NumberOperator.findBySign(operatorOutsideString) == NumberOperator.SUBTRACTION || NumberOperator.findBySign(operatorOutsideString) == NumberOperator.ADDITION) && (nodeOperator == NumberOperator.DIVISION || nodeOperator == NumberOperator.MULTIPLICATION)) {
                 result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
             } else {
                 result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
             }
             return result.toString();
-            // 處理  左邊是單一數字節點 例如  1*(2+(3*(4+5))) -> 2+(3*(4+5))， 這時  1/-8 不需要括號
+
         } else if (currentNode.getOperandLeft() != null
             && currentNode.getOperandLeft().getOperandLeft() == null
             && currentNode.getOperandLeft().getOperandRight() == null
@@ -145,10 +133,22 @@ public class TraversalExpressionHelper {
         return result.toString();
     }
 
+    private static boolean isComposedNode(final TreeNode currentNode) {
+        return currentNode.getOperandLeft() != null
+            && currentNode.getOperandLeft().getOperandLeft() == null
+            && currentNode.getOperandLeft().getOperandRight() == null
+            && currentNode.getOperandRight() != null
+            && currentNode.getOperandRight().getOperandLeft() == null
+            && currentNode.getOperandRight().getOperandRight() == null;
+    }
+
     public static void main(final String[] args) {
         final ExpressionTreeBuilder builder = new ExpressionTreeBuilder();
-        final TreeNode root = builder.buildExpressionTree(" 1  *  ( 2 + ( 3 * ( 4 +  5 )))");
+        final TreeNode root = builder.buildExpressionTree("2*(3/5)");
         log.debug(traversalExpression(root));
+
+        System.out.println(1 - (2 + 3));
+        System.out.println(1 - 2 + 3);
 
     }
 }

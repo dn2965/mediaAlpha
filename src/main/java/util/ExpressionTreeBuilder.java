@@ -1,5 +1,6 @@
 package util;
 
+import static model.NumberOperator.SUBTRACTION;
 import static util.InputUtil.toNormalize;
 
 import java.util.List;
@@ -34,14 +35,16 @@ public class ExpressionTreeBuilder {
 
             if (normalizeExpressionUnit.equals(RIGHT_PARENTHESIS) && !operators.isEmpty() && toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
                 final String operatorForPop = operators.pop();
-                if (!operators.isEmpty() && toNormalize(operators.peek()).equals("-")) {
+                if (!operators.isEmpty() && toNormalize(operators.peek()).equals(SUBTRACTION.getSign())) {
                     final TreeNode currentNode = nodes.pop();
                     final String expressionData = currentNode.getExpressionData();
+
                     final boolean isUnaryMinus = i >= 4
                         && (toNormalize(expressionUnitList.get(i - 2)).equals(RIGHT_PARENTHESIS)
                         || toNormalize(expressionUnitList.get(i - 2)).equals(LEFT_PARENTHESIS))
                         && isOperator(toNormalize(expressionUnitList.get(i - 3)))
                         && toNormalize(expressionUnitList.get(i - 4)).equals(RIGHT_PARENTHESIS);
+
                     if (currentNode.getTrimmedValue().startsWith("-")) {
                         currentNode.setRightParenthesis(expressionUnit);
                         currentNode.setLeftParenthesis(operatorForPop);
@@ -87,20 +90,17 @@ public class ExpressionTreeBuilder {
 
     private void handleApplyUnaryMinus(final Stack<String> operators, final Stack<TreeNode> nodes, final String expressionData, final boolean isUnaryMinus, final String left, final String right) {
         final String pop = operators.pop();// pop  "-"
-
-        if (toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
-            if (isUnaryMinus) {
-                operators.push(pop);
-                final TreeNode newNode = new TreeNode(expressionData);
-                newNode.setLeftParenthesis(left);
-                newNode.setRightParenthesis(right);
-                nodes.push(newNode);
-            } else {
-                final TreeNode treeNode = new TreeNode(pop + expressionData);
-                treeNode.setLeftParenthesis(left);
-                treeNode.setRightParenthesis(right);
-                nodes.push(treeNode);
-            }
+        if (isUnaryMinus) {
+            operators.push(pop);
+            final TreeNode newNode = new TreeNode(expressionData);
+            newNode.setLeftParenthesis(left);
+            newNode.setRightParenthesis(right);
+            nodes.push(newNode);
+        } else {
+            final TreeNode treeNode = new TreeNode(pop + expressionData);
+            treeNode.setLeftParenthesis(left);
+            treeNode.setRightParenthesis(right);
+            nodes.push(treeNode);
         }
     }
 
@@ -120,7 +120,7 @@ public class ExpressionTreeBuilder {
 
     public static void main(final String[] args) {
         final ExpressionTreeBuilder builder = new ExpressionTreeBuilder();
-        final TreeNode root = builder.buildExpressionTree(" (  - 1 ) + (    ( -2 )   -( 3 ) )");
+        final TreeNode root = builder.buildExpressionTree("2*(3/5)");
         log.debug("");
 
     }

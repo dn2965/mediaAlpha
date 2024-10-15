@@ -43,6 +43,8 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("2+(2-3)", "2+(2-3)"),
             new ExpressionTestCase("1-(-1)", "1-(-1)"),
             new ExpressionTestCase("-1-(-1)", "-1-(-1)"),
+            new ExpressionTestCase("1 - (2 - 3)", "1 - (2 - 3)"),
+            new ExpressionTestCase("1 - (2 + 3)", "1 - (2 + 3)"),
 
             new ExpressionTestCase("(2 + 2) - ( - 5 + 1)", "(2 + 2) - ( - 5 + 1)"),
             new ExpressionTestCase("1 - ( - 5 + 1)", "1 - ( - 5 + 1)"),
@@ -50,6 +52,8 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("(2 + 2) * 1", "(2 + 2) * 1"),
             new ExpressionTestCase(" 2 + ( 3 *  - 5 ) ", " 2 +  3 *  - 5  "),
             new ExpressionTestCase(" 1   +  (1  + 2 ) ", " 1   +  1  + 2  "),
+            new ExpressionTestCase(" 2 * ( 3 / 5 )", " 2 *  3 / 5 "),
+            new ExpressionTestCase(" (  2  *  3)  /  5  ", "   2  *  3  /  5  "),
 
             new ExpressionTestCase("2 + (3 * -5)", "2 + 3 * -5"),
             new ExpressionTestCase("2/(3/5)", "2/(3/5)"),
@@ -63,7 +67,11 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase(" 1 + ( 2 ) ", " 1 +  2  "),
             new ExpressionTestCase(" 1 + ( - 2 ) ", " 1 + ( - 2 ) "),
 
-            new ExpressionTestCase(" ( - 1 ) - 1", "  - 1  - 1")
+            new ExpressionTestCase(" ( - 1 ) - 1", "  - 1  - 1"),
+
+            new ExpressionTestCase("2*(3/5)", "2*3/5"),
+            new ExpressionTestCase("(2*3)/5", "2*3/5")
+
         );
     }
 
