@@ -120,7 +120,7 @@ public class ExpressionTreeBuilder {
 
     public static void main(final String[] args) {
         final ExpressionTreeBuilder builder = new ExpressionTreeBuilder();
-        final TreeNode root = builder.buildExpressionTree("2*(3/5)");
+        final TreeNode root = builder.buildExpressionTree("1 + (-2) * 3");
         log.debug("");
 
     }

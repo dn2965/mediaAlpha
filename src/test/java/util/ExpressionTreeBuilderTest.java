@@ -18,6 +18,7 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("2 + (3 / -5)", "2 + 3 / -5"),
             new ExpressionTestCase("x+(y+z)+(t+(v+w))", "x+y+z+t+v+w"),
 
+            new ExpressionTestCase(" ( 1 ) ", "  1  "),
             new ExpressionTestCase("(())", ""),
             new ExpressionTestCase("(((1)))", "1"),
             new ExpressionTestCase("(((1+2)))", "1+2"),
@@ -28,8 +29,7 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("1+(-(1)*2)", "1+(-1*2)"), // 有負號 -> 轉負數後、保留括號
             new ExpressionTestCase("(1)+(-1*2)", "1+(-1*2)"), // 保留括號
             new ExpressionTestCase("(1)+((-1)*2)", "1+(-1*2)"), // 有負號 -> 轉負數後、保留括號
-            new ExpressionTestCase("(-1)+((-1)-(2))", "-1+(-1-2)"),
-            new ExpressionTestCase(" ( - 1 ) + (  ( - 1 ) -    2  )    ", "  - 1  + (   - 1  -    2  )    "),
+
 
             new ExpressionTestCase("1*(2+3*(4+5))", "1*(2+3*(4+5))"),
             new ExpressionTestCase("2+3/-5", "2+3/-5"),
@@ -46,7 +46,7 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("1 - (2 - 3)", "1 - (2 - 3)"),
             new ExpressionTestCase("1 - (2 + 3)", "1 - (2 + 3)"),
 
-            new ExpressionTestCase("(2 + 2) - ( - 5 + 1)", "(2 + 2) - ( - 5 + 1)"),
+            new ExpressionTestCase("(2 + 2) - ( - 5 + 1)", "2 + 2 - ( - 5 + 1)"),
             new ExpressionTestCase("1 - ( - 5 + 1)", "1 - ( - 5 + 1)"),
 
             new ExpressionTestCase("(2 + 2) * 1", "(2 + 2) * 1"),
@@ -57,11 +57,20 @@ public class ExpressionTreeBuilderTest {
 
             new ExpressionTestCase("2 + (3 * -5)", "2 + 3 * -5"),
             new ExpressionTestCase("2/(3/5)", "2/(3/5)"),
-            new ExpressionTestCase("(-1)+1", "-1+1"),
+
+
+            new ExpressionTestCase("1+(-1+2)-3", "1+(-1+2)-3"),
+            new ExpressionTestCase("(-1+2)-3", "-1+2-3"),
+            new ExpressionTestCase("(-1+2)-3", "-1+2-3"),
+            new ExpressionTestCase("(-1+2)+3", "-1+2+3"),
+            new ExpressionTestCase("(-1+2)*3", "(-1+2)*3"),
+            new ExpressionTestCase("(-1+2)/1", "(-1+2)/1"),
+
+            new ExpressionTestCase("1+(-1)", "1+(-1)"),
             new ExpressionTestCase("(-1)-1", "-1-1"),
             new ExpressionTestCase("(-1)*1", "-1*1"),
             new ExpressionTestCase("(-1)/1", "-1/1"),
-            new ExpressionTestCase("1+(-1)", "1+(-1)"),
+
             new ExpressionTestCase("1*(-1)", "1*-1"),
             new ExpressionTestCase("1/(-1)", "1/-1"),
             new ExpressionTestCase(" 1 + ( 2 ) ", " 1 +  2  "),
@@ -69,8 +78,35 @@ public class ExpressionTreeBuilderTest {
 
             new ExpressionTestCase(" ( - 1 ) - 1", "  - 1  - 1"),
 
+            new ExpressionTestCase("2/(3*5)", "2/(3*5)"),
+            new ExpressionTestCase("2/(3+5)", "2/(3+5)"),
+            new ExpressionTestCase("2/(3-5)", "2/(3-5)"),
+            new ExpressionTestCase("2/(3/5)", "2/(3/5)"),
+            new ExpressionTestCase("(2/3)/5", "(2/3)/5"),
+
+            new ExpressionTestCase("2*(3*5)", "2*3*5"),
+            new ExpressionTestCase("2*(3+5)", "2*(3+5)"),
+            new ExpressionTestCase("2*(3-5)", "2*(3-5)"),
+
             new ExpressionTestCase("2*(3/5)", "2*3/5"),
-            new ExpressionTestCase("(2*3)/5", "2*3/5")
+            new ExpressionTestCase("(2*3)/5", "2*3/5"),
+            new ExpressionTestCase("(2*3)/(5*8)", "2*3/(5*8)"),
+            new ExpressionTestCase("(2+3)/(5+8)", "(2+3)/(5+8)"),
+
+            new ExpressionTestCase("((1))", "1"),
+            new ExpressionTestCase("(-5)", "-5"),
+            new ExpressionTestCase("1 + (2 + (3 + 4))", "1 + 2 + 3 + 4"),
+            new ExpressionTestCase("a * (b + (c * d))", "a * (b + c * d)"),
+            new ExpressionTestCase("2 / (3 / 4)", "2 / (3 / 4)"),
+
+            new ExpressionTestCase("1 - (2 - (3 - 4))", "1 - (2 - (3 - 4))"),
+            new ExpressionTestCase("1 / (2 / (3 * 4))", "1 / (2 / (3 * 4))"),
+            new ExpressionTestCase("1 + (-2) + 3", "1 + (-2) + 3"),
+
+            new ExpressionTestCase("((1 + 2) + 3)", "1 + 2 + 3"),
+            new ExpressionTestCase("(-1)+1", "-1+1"),
+            new ExpressionTestCase("(-1)+((-1)-(2))", "-1+(-1-2)"),
+            new ExpressionTestCase(" ( - 1 ) + (  ( - 1 ) -    2  )    ", "  - 1  + (   - 1  -    2  )    ")
 
         );
     }
