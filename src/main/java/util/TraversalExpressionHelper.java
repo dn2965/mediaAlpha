@@ -78,7 +78,11 @@ public class TraversalExpressionHelper {
 
         if (isComposedNode(currentNode)) {
             if (NumberOperator.findBySign(operatorOutsideString) == nodeOperator && nodeOperator == NumberOperator.DIVISION) {
-                result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
+                if (isLeft) {
+                    result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
+                } else {
+                    result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
+                }
                 return result.toString();
             }
 
@@ -118,7 +122,7 @@ public class TraversalExpressionHelper {
             }
 
             if (priorityOfOutsideOperator == priorityOfCurrentNodeOperator && NumberOperator.findBySign(operatorOutsideString) != nodeOperator && currentNode.isWrappedByParenthesis()) {
-                if (oneUpOperator.equals("") && isLeft) {
+                if ( isLeft) {
                     result.append(currentNode.getLeftParenthesis().replaceAll("\\(", "")).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis().replaceAll("\\)", ""));
                 } else {
                     result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
@@ -161,7 +165,7 @@ public class TraversalExpressionHelper {
                 result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
             }
         } else {
-            result.append(left).append(currentNode.getExpressionData()).append(right);
+            result.append(currentNode.getLeftParenthesis()).append(left).append(currentNode.getExpressionData()).append(right).append(currentNode.getRightParenthesis());
         }
         return result.toString();
     }
@@ -178,11 +182,6 @@ public class TraversalExpressionHelper {
     public static void main(final String[] args) {
         final ExpressionTreeBuilder builder = new ExpressionTreeBuilder();
         final TreeNode root = builder.buildExpressionTree("1 + (-2) + 3");
-        // new ExpressionTestCase("1*(2+(3*(4+5)))", "1*(2+3*(4+5))"),
-//        new ExpressionTestCase("(2*(3+4)*5)/6", "2*(3+4)*5/6")
         log.debug(traversalExpression(root));
-        System.out.println(((2f / -1f + (1f / 2)) * (3f * 4) * 5f)); //2/-1+1/2
-        System.out.println(((2f / -1f + (1f / 2)) * 3f * 4 * 5f)); //2/-1+1/2
-
     }
 }
