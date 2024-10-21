@@ -11,12 +11,18 @@ public class TreeNode {
     private String expressionData;
     private TreeNode operandLeft;
     private TreeNode operandRight;
+    private boolean isUnary;
     private boolean wrappedByParenthesis;
     private String trimmedValue = "";
     private String leftParenthesis = "";
     private String rightParenthesis = "";
     public TreeNode(String expressionData) {
         this.expressionData = expressionData;
+        this.trimmedValue = toNormalize(expressionData);
+    }
+
+    public TreeNode() {
+        this.expressionData = "";
         this.trimmedValue = toNormalize(expressionData);
     }
 

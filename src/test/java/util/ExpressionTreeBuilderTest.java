@@ -26,7 +26,6 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase(" ( 1         ) + (           2 ) ", "  1          +            2  "),
             new ExpressionTestCase(" 1  *  ( 2 + ( 3 * ( 4 +  5 )))", " 1  *  ( 2 +  3 * ( 4 +  5 ))"),
 
-            new ExpressionTestCase("1+(-(1)*2)", "1+(-1*2)"), // 有負號 -> 轉負數後、保留括號
             new ExpressionTestCase("(1)+(-1*2)", "1+(-1*2)"), // 保留括號
             new ExpressionTestCase("(1)+((-1)*2)", "1+(-1*2)"), // 有負號 -> 轉負數後、保留括號
 
@@ -62,7 +61,6 @@ public class ExpressionTreeBuilderTest {
 
             new ExpressionTestCase("1+(-1+2)-3", "1+(-1+2)-3"),
             new ExpressionTestCase("(-1+2)-3", "-1+2-3"),
-            new ExpressionTestCase("(-1+2)-3", "-1+2-3"),
             new ExpressionTestCase("(-1+2)+3", "-1+2+3"),
             new ExpressionTestCase("(-1+2)*3", "(-1+2)*3"),
             new ExpressionTestCase("(-1+2)/1", "(-1+2)/1"),
@@ -87,6 +85,7 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("2*(3+5)", "2*(3+5)"),
             new ExpressionTestCase("2*(3-5)", "2*(3-5)"),
 
+            new ExpressionTestCase("2/(3*5)", "2/(3*5)"),
             new ExpressionTestCase("2*(3/5)", "2*3/5"),
             new ExpressionTestCase("(2*3)/5", "2*3/5"),
             new ExpressionTestCase("(2*3)/(5*8)", "2*3/(5*8)"),
@@ -110,9 +109,33 @@ public class ExpressionTreeBuilderTest {
             new ExpressionTestCase("  (   2 /  3  )       /  5         ", "     2 /  3         /  5         "),
             new ExpressionTestCase(" (  2   *   (  3 + 4 )              *   5             )     /    6", "   2   *   (  3 + 4 )              *   5                  /    6"),
 
-            new ExpressionTestCase("1+(-1+2)-3+1*(2+(3*(4+5)))+(2*(3+4)*5)/6+(2/3)/5/((-2/-1+(1/12))*(3*4)*5+(3*4)*5*(2/-1+(1/2))*(3*4)*5)+x+(y+z)+(t+(v+w))+2 + (3 / -5)*(-1)+((-1)-(2))", "1+(-1+2)-3+1*(2+3*(4+5))+2*(3+4)*5/6+2/3/5/((-2/-1+1/12)*3*4*5+3*4*5*(2/-1+1/2)*3*4*5)+x+y+z+t+v+w+2 + 3 / -5*-1+(-1-2)"),
+            new ExpressionTestCase("a * -(b - c)", "a * -(b - c)"),
+            new ExpressionTestCase("a - b * c + d / e", "a - b * c + d / e"),
+            new ExpressionTestCase("(a + (b * (c - d))) / ((e - f) + g)", "(a + b * (c - d)) / ((e - f) + g)"),
+            new ExpressionTestCase("a * (-b + c)", "a * (-b + c)"),
+            new ExpressionTestCase("(-a) / (-b)", "-a / -b"),
+
             new ExpressionTestCase("((2*((2+3)-(4*6))+(8+(7*4))))", "2*(2+3-4*6)+8+7*4"),
-            new ExpressionTestCase("((2*((2*3)-(4+6))+(8+(7*4))))", "2*(2*3-(4+6))+8+7*4")
+            new ExpressionTestCase("((2*((2*3)-(4+6))+(8+(7*4))))", "2*(2*3-(4+6))+8+7*4"),
+            new ExpressionTestCase("-(1)-123", "-1-123"), // 有負號 -> 轉負數後、保留括號
+            new ExpressionTestCase("1+(-(1)*2)", "1+(-1*2)"), // 有負號 -> 轉負數後、保留括號
+            new ExpressionTestCase("-(2+3)", "-(2+3)"),
+            new ExpressionTestCase("1+(-(-(1*2)+1))*2", "1+(-(-(1*2)+1))*2"),
+            new ExpressionTestCase("1+(-(-((-2)*3)+4))*5", "1+(-(-(-2*3)+4))*5"),
+            new ExpressionTestCase("1+(-1+2)-3+1*(99+(88*(77+66)))+1", "1+(-1+2)-3+1*(99+88*(77+66))+1"),
+            new ExpressionTestCase("5/((-2/-1+(2)))", "5/(-2/-1+2)"),
+            new ExpressionTestCase("1+(-1+2)-3+1*(2+(3*(4+5)))+(2*(3+4)*5)/6+(2/3)/5/((-2/-1+(1/12))*(3*4)*5+(3*4)*5*(2/-1+(1/2))*(3*4)*5)+x+(y+z)+(t+(v+w))+2 ", "1+(-1+2)-3+1*(2+3*(4+5))+2*(3+4)*5/6+2/3/5/(-2/-1+1/12*3*4*5+3*4*5*(2/-1+1/2)*3*4*5)+x+y+z+t+v+w+2 "),
+
+            new ExpressionTestCase("(a / (b * (c + d))) - e", "a / (b * (c + d)) - e"),
+            new ExpressionTestCase("((a + b) * (c / d)) - ((e - f) * (g + h))", "(a + b) * c / d - (e - f) * (g + h)"),
+            new ExpressionTestCase("-(a * (b - c))", "-(a * (b - c))"),
+
+            new ExpressionTestCase("2 * 3 / 4", "2 * 3 / 4"),
+            new ExpressionTestCase("a + b - c * d / e + f - g", "a + b - c * d / e + f - g"),
+            new ExpressionTestCase("-(a + b) * -c", "-(a + b) * -c"),
+            new ExpressionTestCase("-(1 - (2 + (3 - 4)))", "-(1 - (2 + (3 - 4)))"),
+            new ExpressionTestCase("a / (b / (c / d))", "a / (b / (c / d))"),
+            new ExpressionTestCase("2 / 3 * 4", "2 / 3 * 4")
         );
     }
 
@@ -137,7 +160,6 @@ public class ExpressionTreeBuilderTest {
 
     static Stream<ExpressionTestCase> expressionFailedCasesProvider() {
         return Stream.of(
-            new ExpressionTestCase("-(1)-123", ""),
             new ExpressionTestCase("-1--2", ""),
             new ExpressionTestCase("1--2", ""),
             new ExpressionTestCase("-5 - -1 ", ""),

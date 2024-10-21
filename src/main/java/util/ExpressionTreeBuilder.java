@@ -17,96 +17,74 @@ public class ExpressionTreeBuilder {
 
     public TreeNode buildExpressionTree(final String expression) {
         final List<String> expressionUnitList = InputTokenizeParser.parse(expression); // 含空白
+        return buildExpressionTree(expressionUnitList, 0, expressionUnitList.size() - 1);
+    }
+
+    // Helper method to recursively parse and build the expression tree
+    private TreeNode buildExpressionTree(final List<String> expressionUnitList, int start, int end) {
         final Stack<TreeNode> nodes = new Stack<>();
         final Stack<String> operators = new Stack<>();
 
-        for (int i = 0; i < expressionUnitList.size(); i++) {
+        int i = start;
+        while (i <= end) {
             final String expressionUnit = expressionUnitList.get(i);
             final String normalizeExpressionUnit = toNormalize(expressionUnit);
 
             if (isOperator(normalizeExpressionUnit)) {
-                operators.push(expressionUnit);
-                continue;
-            }
-            if (normalizeExpressionUnit.equals(LEFT_PARENTHESIS)) {
-                operators.push(expressionUnit);
-                continue;
-            }
-
-            if (normalizeExpressionUnit.equals(RIGHT_PARENTHESIS) && !operators.isEmpty() && toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
-                final String operatorForPop = operators.pop();
-                if (!operators.isEmpty() && toNormalize(operators.peek()).equals(SUBTRACTION.getSign())) {
-                    final TreeNode currentNode = nodes.pop();
-                    final String expressionData = currentNode.getExpressionData();
-
-                    final boolean isUnaryMinus = i >= 4
-                        && (toNormalize(expressionUnitList.get(i - 2)).equals(RIGHT_PARENTHESIS)
-                        || toNormalize(expressionUnitList.get(i - 2)).equals(LEFT_PARENTHESIS))
-                        && isOperator(toNormalize(expressionUnitList.get(i - 3)))
-                        && toNormalize(expressionUnitList.get(i - 4)).equals(RIGHT_PARENTHESIS);
-
-                    if (currentNode.getTrimmedValue().startsWith("-")) {
-                        currentNode.setRightParenthesis(expressionUnit);
-                        currentNode.setLeftParenthesis(operatorForPop);
-                        currentNode.setWrappedByParenthesis(true);
-                        nodes.push(currentNode);
-                        continue;
-                    } else {
-                        handleApplyUnaryMinus(operators, nodes, expressionData, isUnaryMinus, operatorForPop, expressionUnit);
-                        continue;
-                    }
+                if (normalizeExpressionUnit.equals(SUBTRACTION.getSign())
+                    && (i == 0 || isOperator(toNormalize(expressionUnitList.get(i - 1)))
+                    || toNormalize(expressionUnitList.get(i - 1)).equals(LEFT_PARENTHESIS))) {
+                    operators.push(String.format("UNARY_MINUS%s", expressionUnit));
                 } else {
-                    operators.push(operatorForPop);
-                    if (nodes.isEmpty()) {
-                        continue;
+                    operators.push(expressionUnit);
+                }
+            } else if (normalizeExpressionUnit.equals(LEFT_PARENTHESIS)) {
+                operators.push(expressionUnit);
+            } else if (normalizeExpressionUnit.equals(RIGHT_PARENTHESIS)) {
+                while (!operators.isEmpty() && !toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
+                    final TreeNode newNode = createNode(nodes, operators);
+                    nodes.push(newNode);
+                }
+
+                if (!operators.isEmpty() && toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
+                    final String pop = operators.pop();// Pop the left parenthesis
+                    if (!nodes.isEmpty()) {
+                        final TreeNode subTree = nodes.pop(); // Subtree inside the parenthesis
+                        final TreeNode parenNode = new TreeNode();
+                        parenNode.setWrappedByParenthesis(true);
+                        parenNode.setLeftParenthesis(pop);
+                        parenNode.setRightParenthesis(expressionUnit);
+                        parenNode.setOperandRight(subTree);
+
+                        nodes.push(parenNode);
                     }
                 }
+            } else {
+                nodes.push(new TreeNode(expressionUnit));
             }
 
-            if (normalizeExpressionUnit.equals(RIGHT_PARENTHESIS)) {
-                while (!operators.isEmpty() && !toNormalize(operators.peek()).equals(LEFT_PARENTHESIS)) {
-                    nodes.push(createNode(nodes, operators));
-                }
-                final TreeNode topNode = nodes.peek();
-                if (!operators.isEmpty()) {
-                    topNode.setLeftParenthesis(operators.pop());
-                }
-                topNode.setRightParenthesis(expressionUnit);
-                topNode.setWrappedByParenthesis(true);
-                continue;
-            }
-            nodes.push(new TreeNode(expressionUnit));
+            i++;
         }
 
-        while (!operators.isEmpty() && !nodes.isEmpty()) {
+        while (!operators.isEmpty()) {
             TreeNode newNode = createNode(nodes, operators);
             nodes.push(newNode);
         }
-        if (nodes.isEmpty()) {
-            return new TreeNode("");
-        }
-        return nodes.pop();
-    }
 
-    private void handleApplyUnaryMinus(final Stack<String> operators, final Stack<TreeNode> nodes, final String expressionData, final boolean isUnaryMinus, final String left, final String right) {
-        final String pop = operators.pop();// pop  "-"
-        if (isUnaryMinus) {
-            operators.push(pop);
-            final TreeNode newNode = new TreeNode(expressionData);
-            newNode.setLeftParenthesis(left);
-            newNode.setRightParenthesis(right);
-            nodes.push(newNode);
-        } else {
-            final TreeNode treeNode = new TreeNode(pop + expressionData);
-            treeNode.setLeftParenthesis(left);
-            treeNode.setRightParenthesis(right);
-            nodes.push(treeNode);
-        }
+        return nodes.isEmpty() ? new TreeNode("") : nodes.pop();
     }
 
     private TreeNode createNode(final Stack<TreeNode> nodes, final Stack<String> operators) {
         final TreeNode right = nodes.pop();
         final String operator = operators.pop();
+
+        if (operator.startsWith("UNARY_MINUS")) {
+            TreeNode unaryNode = new TreeNode(operator.replaceAll("UNARY_MINUS", ""));
+            unaryNode.setUnary(true);
+            unaryNode.setOperandRight(right);
+            return unaryNode;
+        }
+
         final TreeNode node = new TreeNode(operator);
         node.setOperandRight(right);
         final TreeNode left = nodes.pop();
@@ -114,14 +92,14 @@ public class ExpressionTreeBuilder {
         return node;
     }
 
-    private boolean isOperator(String token) {
+    private boolean isOperator(final String token) {
         return NumberOperator.findBySign(token) != null;
     }
 
     public static void main(final String[] args) {
         final ExpressionTreeBuilder builder = new ExpressionTreeBuilder();
-        final TreeNode root = builder.buildExpressionTree("1 + (-2) * 3");
+        final TreeNode node = builder.buildExpressionTree("1+(-(2*3)+1)*4");
         log.debug("");
-
     }
+
 }

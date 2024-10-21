@@ -1,7 +1,9 @@
 package model;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public enum NumberOperator {
     ADDITION("+", 1), SUBTRACTION("-", 1), MULTIPLICATION("*", 2), DIVISION("/", 2);
     @Getter
@@ -16,6 +18,7 @@ public enum NumberOperator {
                 return numberOperator;
             }
         }
+//        log.warn("check, the result is null {}", signString);
         return null;
     }
 
